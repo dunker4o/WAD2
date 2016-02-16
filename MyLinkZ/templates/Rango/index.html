@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Rango</title>
+		<!--<link type="text/css" rel="stylesheet" href="/static/css/style.css"></link>-->
+    </head>
+    <body>
+        <h1>Rango says...</h1>
+        I don't like Python too! <br>
+		{% if categories %}
+			<br>
+			<h2>All available categories: </h2>
+			<ul>
+				{% for category in categories %}
+					<li><a href="/Rango/category/{{category.slug}}">{{category.name}}</a></li>
+				{% endfor %}
+			</ul>
+		{% else %}
+			<strong>There are no categories present</strong>
+		{% endif %}
+		{% if pages %}
+			<br>
+			<h2>Top five most viewed pages:</h2>
+			<ul>
+				{% for page in pages %}
+					<li><a href="{{page.url}}">{{page.title}}</a></li>
+				{% endfor %}
+			</ul>
+		{% endif %}
+		<a href="/Rango/about">About</a>
+    </body>
+</html>
