@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from Rango.models import Category, Page
+from Rango.forms import CategoryForm, PageForm
 
 # Create your views here.
 
@@ -28,7 +29,56 @@ def secret(request):
 	
 def about(request):
 	return HttpResponse("If you want to know more about why we are studying Django, ask <a href='mailto:Leif.Azzopardi@glasgow.ac.uk?Subject=WAD2%20question&cc=2140786g@student.gla.ac.uk'>Leifos</a> please." + "<br>" + "Or you could look for some hidden pages..." + "<br>" + "<img src='/static/images/beMine.jpg' height=60% width=60%>")
+
+def add_page(request, category_name_slug):
+
+    try:
+        cat = Category.objects.get(slug=category_name_slug)
+    except Category.DoesNotExist:
+                cat = None
+
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+        if form.is_valid():
+            if cat:
+                page = form.save(commit=False)
+                page.category = cat
+                page.views = 0
+                page.save()
+                # probably better to use a redirect here.
+                return category(request, category_name_slug)
+        else:
+            print form.errors
+    else:
+        form = PageForm()
+
+    context_dict = {'form':form, 'category': cat}
+
+    return render(request, 'Rango/add_page.html', context_dict)
 	
+def add_category(request):
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            # Save the new category to the database.
+            form.save(commit=True)
+
+            # Now call the index() view.
+            # The user will be shown the homepage.
+            return index(request)
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print form.errors
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = CategoryForm()
+
+    # Bad form (or form details), no form supplied...
+    # Render the form with error messages (if any).
+    return render(request, 'Rango/add_category.html', {'form': form})	
 
 def static(request):
 	return HttpResponse("<img src=\"/static/images/beMine.jpg\">")
